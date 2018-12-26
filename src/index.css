@@ -76,7 +76,9 @@ td {
   
   /* In practice, this ends up as the min width / height*/
   width: var(--gap-width);
+  min-width: var(--gap-width);
   height: var(--gap-width);
+  min-height: var(--gap-width);
 }
 
 .hoverGood {

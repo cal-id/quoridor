@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import {Helmet} from 'react-helmet';
 
 
 class Share extends React.Component {
@@ -231,7 +232,7 @@ class Game extends React.Component {
     super(props);
     this.state = this.getResetState();
     this.URL_BASE = "https://ci240.user.srcf.net/quoridor";
-    this.state.gameId = parseInt(window.location.hash)
+    this.state.gameId = parseInt(window.location.hash.substring(1));
     if(!this.state.gameId) {
       this.state.gameId = Math.floor(Math.random() * 1000000000);
       window.location.hash = this.state.gameId;
@@ -329,7 +330,9 @@ class Game extends React.Component {
       .then(r => this.jsonResponseOrError(r))
       .then(jsonObj => {
         if(!('error' in jsonObj) && 'latest' in jsonObj){
-          this.latest = jsonObj.latest;
+          if(this.latest < jsonObj.latest) {
+            this.latest = jsonObj.latest;
+          }
         } else if('error' in jsonObj) {
           console.error("Server error: " + jsonObj.error);
         } else {
@@ -356,7 +359,7 @@ class Game extends React.Component {
       .then(r => this.jsonResponseOrError(r))
       .then(jsonObj => {
         if (!('error' in jsonObj) && 'num' in jsonObj && 'moves' in jsonObj) {
-          if(this.latest === jsonObj.num) return;
+          if(this.latest >= jsonObj.num) return;
           this.latest = jsonObj.num;
           let moves = jsonObj.moves;
           this.setState(this.getResetState());
@@ -828,6 +831,10 @@ class Game extends React.Component {
 
     return (
       <div>
+        <Helmet>
+          <title>Quoridor</title>
+          <meta name="viewport" content="width=600"/>
+        </Helmet>
         <div className="game">{mainContent}</div>
         <Share 
           src={this.URL_BASE + "#" + this.state.gameId}
