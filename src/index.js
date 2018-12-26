@@ -3,6 +3,16 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 
+class Share extends React.Component {
+  render() {
+    let className = "share"
+    if(!this.props.lastSeen || 
+       new Date().getTime() - this.props.lastSeen > 2000) 
+        className += " shareBroken"
+    return <div className={className}>Opponent link: {this.props.src}</div>
+  }
+}
+
 class WallIndicator extends React.Component {
   render() {
     let row = [];
@@ -316,7 +326,7 @@ class Game extends React.Component {
       // redirect: "follow",
       body: JSON.stringify(data)
     })
-      .then(this.jsonResponseOrError)
+      .then(r => this.jsonResponseOrError(r))
       .then(jsonObj => {
         if(!('error' in jsonObj) && 'latest' in jsonObj){
           this.latest = jsonObj.latest;
@@ -332,13 +342,18 @@ class Game extends React.Component {
     if(!response.ok) {
       debugger;
       throw Error(response.statusText, response)
-    } else return response.json();
+    } else {
+      this.setState({
+        lastSeen: new Date().getTime()
+      });
+      return response.json();
+    }
   }
 
   pollChanges() {
     const url = `${this.URL_BASE}/get.py?gameId=${this.state.gameId}` ;
     fetch(url)
-      .then(this.jsonResponseOrError)
+      .then(r => this.jsonResponseOrError(r))
       .then(jsonObj => {
         if (!('error' in jsonObj) && 'num' in jsonObj && 'moves' in jsonObj) {
           if(this.latest === jsonObj.num) return;
@@ -704,8 +719,6 @@ class Game extends React.Component {
         newPos.y < h &&
         newPos.t()
     );
-
-    // TODO: Add side jump logic
     return moves;
   }
 
@@ -812,9 +825,14 @@ class Game extends React.Component {
         </div>
       </div>
     );
+
     return (
       <div>
         <div className="game">{mainContent}</div>
+        <Share 
+          src={this.URL_BASE + "#" + this.state.gameId}
+          lastSeen={this.state.lastSeen}
+          />
         <History
           current={this.state.stepNumber}
           max={this.state.history.length}

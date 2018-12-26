@@ -175,3 +175,11 @@ tr:nth-child(even) td {
 .history span {
   margin-left: 15px;
 }
+
+.share {
+  text-align: center;
+}
+
+.shareBroken {
+  text-decoration: line-through;
+}
