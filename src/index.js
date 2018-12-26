@@ -232,11 +232,16 @@ class Game extends React.Component {
     super(props);
     this.state = this.getResetState();
     this.URL_BASE = "https://ci240.user.srcf.net/quoridor";
-    this.state.gameId = parseInt(window.location.hash.substring(1));
-    if(!this.state.gameId) {
-      this.state.gameId = Math.floor(Math.random() * 1000000000);
-      window.location.hash = this.state.gameId;
+    this.state.gameId = this.gameIdFromHash();
+  }
+
+  gameIdFromHash() {
+    let gameId = parseInt(window.location.hash.substring(1));
+    if(!gameId) {
+      gameId = Math.floor(Math.random() * 1000000000);
+      window.location.hash = gameId;
     }
+    return gameId
   }
 
   getResetState() {
@@ -263,10 +268,13 @@ class Game extends React.Component {
   componentDidMount() {
     // Poll for changes
     this.timer = setInterval(() => this.pollChanges(), 500);
+    this.listenerFun = () => this.setState({gameId: this.gameIdFromHash()});
+    window.addEventListener("hashchange", this.listenerFun, false);
   }
 
   componentWillUnmount() {
     clearInterval(this.timer);
+    window.removeEventListener("hashchange", this.listenerFun, false);
   }
 
 
