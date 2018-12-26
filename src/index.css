@@ -1,14 +1,177 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+
+:root{
+  --player2: #4f0011;
+  --player1: #f9d161;
+  --wall: #e2a600;
+  --gap: #680404;
+  --empty-cell: black;
+  --gap-width: 15px;
+  --cell-width: 50px;
+  --half-cell-width: calc(var(--cell-width) / 2);
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+
+html {
+  height: 100%;
+}
+
+body {
+  font-family: 'Ubuntu Mono', monospace;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  align-content: center;
+
+  margin: 0px;
+}
+
+.game {
+  color: white;
+  padding: 10px;
+  background: black;
+  border-radius: 10px;
+  animation: bounceIn 0.5s;
+}
+
+#root {
+  margin: 0 auto;
+}
+
+.game-info {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+.game-board {
+}
+
+.game-info table{
+  margin: 0 auto;
+}
+
+
+td {
+  padding: 0px; /* Remove default of 1px */
+}
+
+
+.gap {
+  background: var(--gap);
+  
+  /* In practice, this ends up as the min width / height*/
+  width: var(--gap-width);
+  height: var(--gap-width);
+}
+
+.hoverGood {
+  background: #229436;
+}
+
+.hoverBad {
+  background: #c00d26;
+}
+
+
+.wall {
+  background: var(--wall);
+}
+
+table {
+  border-collapse: collapse; /* Remove spacing between cells */
+}
+
+.cell {
+  background: var(--empty-cell);
+}
+
+.cellFill { /* A cell fill gives the cell some content */
+  width: var(--cell-width);
+  height: var(--cell-width);
+  /* The following three help with centering stuff inside*/
+  display: flex;
+  align-items: center;
+  align-content: center;
+}
+
+tr:nth-child(even) td {
+  height: var(--gap-width);
+}
+
+.cellFill {
+  background: var(--empty-cell);
+}
+
+
+
+.player {
+  border-radius: var(--half-cell-width);
+  vertical-align: middle;
+  display: table-cell;
+  text-align: center;
+  color: black;
+}
+
+.player1 {
+  background: var(--player1);
+}
+
+.player2 {
+  background: var(--player2);
+
+}
+
+.move {
+  margin: 0 auto;
+  width: var(--half-cell-width);
+  height: var(--half-cell-width);
+  border-radius: calc(var(--half-cell-width) / 2);
+}
+
+.wallIndicator {
+  width: var(--gap-width);
+  height: var(--cell-width);
+  border: 5px solid black;
+}
+
+
+.winner {
+  margin: 0 auto;
+}
+
+.winner .player {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+}
+
+.state {
+  
+}
+
+.currentState {
+  font-weight: bold;
+}
+
+.history {
+  text-align: center;
+}
+
+.history span {
+  margin-left: 15px;
 }
