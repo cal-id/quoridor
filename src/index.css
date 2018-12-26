@@ -119,8 +119,6 @@ tr:nth-child(even) td {
   background: var(--empty-cell);
 }
 
-
-
 .player {
   border-radius: var(--half-cell-width);
   vertical-align: middle;
@@ -154,6 +152,7 @@ tr:nth-child(even) td {
 
 .winner {
   margin: 0 auto;
+  width: min-content;
 }
 
 .winner .player {
