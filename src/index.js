@@ -220,7 +220,12 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = this.getResetState();
-    this.URL_BASE = "https://ci240.user.srcf.net/test-python/";
+    this.URL_BASE = "https://ci240.user.srcf.net/quoridor";
+    this.state.gameId = parseInt(window.location.hash)
+    if(!this.state.gameId) {
+      this.state.gameId = Math.floor(Math.random() * 1000000000);
+      window.location.hash = this.state.gameId;
+    }
   }
 
   getResetState() {
@@ -253,32 +258,9 @@ class Game extends React.Component {
     clearInterval(this.timer);
   }
 
-  /* Called when we have a new set of moves to get from
-   * server */
-  onNewLatest(latest) {
-    const url = this.URL_BASE + "games/g2/";
-
-    fetch(url + latest)
-      .then(response => response.json())
-      .then(jsonObj => {
-        let moves = jsonObj.moves;
-        this.setState(this.getResetState());
-        moves.forEach(m => {
-          if (m.type === "player")
-            this.performPlayerMove(m.data.position.x, m.data.position.y);
-          else if (m.type === "wall")
-            this.performWallMove(
-              m.data.h,
-              m.data.position.x,
-              m.data.position.y
-            );
-        });
-      });
-  }
 
   upload() {
-    const url = this.URL_BASE;
-    const gameId = 2;
+    const url = `${this.URL_BASE}/upload.py`;
 
     const moves = [];
 
@@ -321,34 +303,64 @@ class Game extends React.Component {
     }
 
     const data = {
-      gameId: gameId,
+      gameId: this.state.gameId,
       moves: moves
     };
 
-    fetch(url + "upload.py", {
+    fetch(url, {
       method: "POST",
-      mode: "no-cors",
+      // mode: "no-cors",
       headers: {
         "Content-Type": "application/json"
       },
-      redirect: "follow",
+      // redirect: "follow",
       body: JSON.stringify(data)
     })
-      .then(response => response.json)
-      .then(jsonObj => this.latest = jsonObj.latest);
+      .then(this.jsonResponseOrError)
+      .then(jsonObj => {
+        if(!('error' in jsonObj) && 'latest' in jsonObj){
+          this.latest = jsonObj.latest;
+        } else if('error' in jsonObj) {
+          console.error("Server error: " + jsonObj.error);
+        } else {
+          console.error("Unexpected response:", jsonObj);
+        }
+      }).catch(error => console.log(error));
+  }
+
+  jsonResponseOrError(response) {
+    if(!response.ok) {
+      debugger;
+      throw Error(response.statusText, response)
+    } else return response.json();
   }
 
   pollChanges() {
-    const url = "https://ci240.user.srcf.net/test-python/games/g2/";
-    fetch(url + "latest")
-      .then(response => response.json())
+    const url = `${this.URL_BASE}/get.py?gameId=${this.state.gameId}` ;
+    fetch(url)
+      .then(this.jsonResponseOrError)
       .then(jsonObj => {
-        if (this.latest !== jsonObj.latest && jsonObj.latest) {
-          this.setState({ working: true });
-          this.latest = jsonObj.latest;
-          this.onNewLatest(jsonObj.latest);
+        if (!('error' in jsonObj) && 'num' in jsonObj && 'moves' in jsonObj) {
+          if(this.latest === jsonObj.num) return;
+          this.latest = jsonObj.num;
+          let moves = jsonObj.moves;
+          this.setState(this.getResetState());
+          moves.forEach(m => {
+            if (m.type === "player")
+              this.performPlayerMove(m.data.position.x, m.data.position.y);
+            else if (m.type === "wall")
+              this.performWallMove(
+                m.data.h,
+                m.data.position.x,
+                m.data.position.y
+              );
+          });
+        } else if('error' in jsonObj) {
+          console.error("Server error: " + jsonObj.error);
+        } else {
+          console.error("Unexpected response:", jsonObj)
         }
-      });
+      }).catch(error => console.error(error));
   }
 
   isPlayer1Turn(num) {

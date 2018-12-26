@@ -2,6 +2,7 @@
   "name": "quoridor-react",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://ci240.user.srcf.net/quoridor/",
   "dependencies": {
     "react": "^16.7.0",
     "react-dom": "^16.7.0",

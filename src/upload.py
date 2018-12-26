@@ -4,20 +4,10 @@ import sys
 import os
 import json
 from pathlib import Path
+from utils import print_header, error, get_largest_in_game_root, get_game_root
 
 import cgitb
 cgitb.enable(display=0, logdir="logs")
-
-
-def print_header(): 
-    print("Content-type: application/json")
-    print("Access-Control-Allow-Origin: *\r\n")  # Allow access from code pen
-
-def error(message):
-    print_header()
-    print(json.dumps({
-        "error": message
-    }))
 
 def save_query():
     try:
@@ -74,12 +64,11 @@ def save_query():
             this_move = {}
         clean_moves.append(this_move)
 
-    this_game_root = Path(os.getcwd()) / "games" / ("g" + str(game_id))
-    this_game_root.mkdir(parents=True, exist_ok=True)
+    this_game_root = get_game_root(game_id)
     
-    largest = max((int(p.name[1:]) for p in this_game_root.iterdir() if p.name[1:].isnumeric()), default=0)
-
-    this_one = this_game_root / ("m" + str(largest + 1))
+    largest = get_largest_in_game_root(this_game_root)
+    new_num = largest + 1
+    this_one = this_game_root / ("m" + str(new_num))
 
     if not this_one.parent.exists():
         error("Something is wrong with the filesystem. Can't access: " + this_one.parent)
@@ -87,14 +76,12 @@ def save_query():
 
     with open(str(this_one), "w") as fh:
         fh.write(json.dumps({
-            "moves": clean_moves
+            "moves": clean_moves,
+            "num": new_num
         }))
-    
-    with open(str(this_game_root / "latest"), "w") as fh:
-        fh.write(json.dumps({"latest": this_one.name}))
 
     print_header()
-    print(json.dumps({"latest": this_one.name}))
+    print(json.dumps({"latest": new_num}))
 
 save_query()
 
